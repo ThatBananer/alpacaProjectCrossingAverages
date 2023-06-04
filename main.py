@@ -7,7 +7,7 @@ import pandas as pd
 from datetime import date, datetime, timedelta
 # from ta.volatility import BollingerBands
 # from ta.momentum import RSIIndicator
-from alpaca_trade_api.rest import REST#, TimeFrame, TimeFrameUnit
+from alpaca_trade_api.rest import REST  # , TimeFrame, TimeFrameUnit
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 import json
 import backtrader as bt
@@ -37,11 +37,13 @@ import vectorbt as vbt
 from alpaca.data import StockHistoricalDataClient, StockBarsRequest
 from alpaca.data import StockHistoricalDataClient
 
+
 # Functions Needed For Back Testing
 
 # Symbol hist function
 def get_symbol_history(symbol, simulationStartDate,
-                       simulationEndDate):  # returns dataframe, symbol string, simulationStartDate string, SimulationEndDate string
+                       simulationEndDate):  # returns dataframe, symbol string, simulationStartDate string,
+    # SimulationEndDate string
     # Converting string representation of dates to datetime objs for TimeFrame
     # datetime format
     dtStartDate = string_to_datetime(simulationStartDate)
@@ -58,6 +60,7 @@ def get_symbol_history(symbol, simulationStartDate,
     symbol_bars = stock_client.get_stock_bars(request_params)
     return symbol_bars.df
 
+
 # Expected output format of get_symbol_history(symbol)
 """
 symbol  		timestamp                		open  	    high	    low 	    close	    volume		    trade_count	    vwap
@@ -70,18 +73,25 @@ BTC/USD 	    2022-09-01 05:00:00+00:00   	20049.0 	20285.0	    19555.0 	20160.0 
 		        2022-09-07 05:00:00+00:00   	18723.0 	19459.0 	18678.0 	19351.0 	2259.2351   	16204.0 		19123.487500
 """
 
+
 # Convert string date to datetime date
 def string_to_datetime(date):
     return datetime.strptime(date, "%Y-%m-%d")
+
 
 # Create timeframe object
 def get_timeframe():
     tf_unit = TimeFrameUnit('Day')
     return TimeFrame(1, tf_unit)
 
+
 # get new price val function
 def get_new_closing_daily_price(day_iter, symbol_hist):  # day_iter int, symbol_bars df
     return symbol_hist.loc[day_iter, 'close']
+
+
+def signalVerified(buyOrSell):  # buyOrSell String
+    return True
 
 
 # ---- BACK TESTING --- #
@@ -100,21 +110,37 @@ stock_client = StockHistoricalDataClient(apiKey, secretKey)
 
 ge_hist = get_symbol_history(generalElectricCoSymbol, simulationStartDate, simulationEndDate)
 
-# Create MA instance
-time_period = delta.days
-ma = MovingAverage(time_period)
+# Create MA instances
+maLPeriod = 20  # days
+maSPeriod = 5  # days
+maL = MovingAverage(maLPeriod)
+maS = MovingAverage(maSPeriod)
+
+# bool for keeping track of if holding any stock
+hasStock = False
 
 # Calculate MA
 while 1 == 1:
     day_iter = 0
     # get new price val
     newPrice = get_new_closing_daily_price(day_iter, ge_hist)
-    # add new vals to moving average
-    ma.addNewDataPoint(newPrice)
-    # check if moving avergaes were crossed
-    # generate buy sell signal
-    ## verify possible singal
-    # execute based on signal
+    # add new vals to moving averages
+    maL.addNewDataPoint(newPrice)
+    maS.addNewDataPoint(newPrice)
+    # check if moving averages were crossed
+    if maL.movingAvg < maS.movingAvg and not hasStock:
+        # generate buy signal
+        if signalVerified():
+            # buy
+            hasStock = True
+
+    if maL.movingAvg > maS.movingAvg and hasStock:
+        # generate sell signal
+        if signalVerified():
+            # sell
+            hasStock = False
+
     # break if no more data
+    if delta == day_iter:
+        break
     day_iter = + 1
-    break
