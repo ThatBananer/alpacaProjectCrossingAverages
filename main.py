@@ -89,12 +89,23 @@ def get_timeframe():
 def get_new_closing_daily_price(day_iter, symbol_hist):  # day_iter int, symbol_bars df
     return symbol_hist.loc[day_iter, 'close']
 
+# get new vwap function
+def get_new_vwap(day_iter, symbol_hist):  # day_iter int, symbol_bars df
+    return symbol_hist.loc[day_iter, 'vwap']
 
-def signalVerified(buyOrSell):  # buyOrSell String
-    return True
+
+def signalVerified_vwap_vs_price(buyOrSell, day_iter, symbol_hist):  # buyOrSell String, day_iter int
+    finalSingal = None
+    if get_new_vwap(day_iter, symbol_hist) > get_new_closing_daily_price(day_iter, symbol_hist):
+        finalSingal = "bear"
+    if get_new_vwap(day_iter, symbol_hist) < get_new_closing_daily_price(day_iter, symbol_hist):
+        finalSingal = "bull"
+    if finalSingal == "bear" and buyOrSell == "sell" or finalSingal == "bull" and buyOrSell == "buy":
+        return True
+    return False
 
 
-# ---- BACK TESTING --- #
+# ---- BACK TESTING INPUTS --- #
 # dates in string format
 simulationStartDate = "2023-01-01"
 simulationEndDate = "2023-05-15"
@@ -116,6 +127,10 @@ maSPeriod = 5  # days
 maL = MovingAverage(maLPeriod)
 maS = MovingAverage(maSPeriod)
 
+# Account in $USD
+accountHoldings = 10000
+sharesOfSymbol = 0
+
 # bool for keeping track of if holding any stock
 hasStock = False
 
@@ -130,14 +145,20 @@ while 1 == 1:
     # check if moving averages were crossed
     if maL.movingAvg < maS.movingAvg and not hasStock:
         # generate buy signal
-        if signalVerified():
+        if signalVerified_vwap_vs_price("buy", day_iter, ge_hist):
             # buy
+            sharesToBuy = accountHoldings // newPrice
+            sharesOfSymbol += sharesToBuy
+            accountHoldings -= sharesToBuy * newPrice
             hasStock = True
 
     if maL.movingAvg > maS.movingAvg and hasStock:
         # generate sell signal
-        if signalVerified():
+        if signalVerified_vwap_vs_price("sell", day_iter, ge_hist):
             # sell
+            sharesToSell = sharesOfSymbol
+            sharesOfSymbol = 0
+            accountHoldings = sharesToSell * newPrice
             hasStock = False
 
     # break if no more data
