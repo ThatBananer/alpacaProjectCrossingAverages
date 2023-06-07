@@ -19,8 +19,8 @@ from linked_list import LinkedList
 from moving_average import MovingAverage
 
 # Keys
-apiKey = "Placeholder"
-secretKey = "Placeholder"
+apiKey = "PKT0JEG72DBJCB4EUJYH"
+secretKey = "5ZRWejuNlnmBe0yMQ6ufWJygWmZCq6uErOAPJdKY"
 
 # Imports for Paper Trading
 
@@ -29,7 +29,7 @@ from alpaca.trading.client import TradingClient
 # ---- PAPER TRADING WITH ALGO ---- #
 
 # paper=True enables paper trading
-trading_client = TradingClient(apiKey, secretKey, paper=True)
+#trading_client = TradingClient(apiKey, secretKey, paper=True)
 
 # Imports For Back Testing
 
@@ -134,11 +134,14 @@ sharesOfSymbol = 0
 # bool for keeping track of if holding any stock
 hasStock = False
 
+day_iter = 0
+
 # Calculate MA
 while 1 == 1:
-    day_iter = 0
     # get new price val
+    print(day_iter)
     newPrice = get_new_closing_daily_price(day_iter, ge_hist)
+
     # add new vals to moving averages
     maL.addNewDataPoint(newPrice)
     maS.addNewDataPoint(newPrice)
@@ -162,6 +165,6 @@ while 1 == 1:
             hasStock = False
 
     # break if no more data
-    if delta == day_iter:
+    if delta - 10 == day_iter:
         break
     day_iter = + 1
