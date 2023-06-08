@@ -31,7 +31,7 @@ class MovingAverage:
         self.linked_list.newHead(newVal)
         self.movingAvgSum =+ newVal
         if self.linked_list.length == self.time_period_days:
-            self.movingAvgSum =- self.linked_list.tail
+            self.movingAvgSum =- self.linked_list.tail.data
             self.linked_list.delete_tail()
 
         if self.movingAvg == 0:

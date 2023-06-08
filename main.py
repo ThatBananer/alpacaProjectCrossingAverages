@@ -136,13 +136,9 @@ hasStock = False
 
 day_iter = 0
 
-# Calculate MA
-while 1 == 1:
-    # get new price val
-    print(day_iter)
-    newPrice = get_new_closing_daily_price(day_iter, ge_hist)
-
-    # add new vals to moving averages
+for index, row in ge_hist.iterrows():
+    print(index)
+    newPrice = row['close']
     maL.addNewDataPoint(newPrice)
     maS.addNewDataPoint(newPrice)
     # check if moving averages were crossed
@@ -164,7 +160,6 @@ while 1 == 1:
             accountHoldings = sharesToSell * newPrice
             hasStock = False
 
-    # break if no more data
-    if delta - 10 == day_iter:
-        break
-    day_iter = + 1
+
+
+print(accountHoldings)
