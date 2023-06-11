@@ -19,8 +19,8 @@ from linked_list import LinkedList
 from moving_average import MovingAverage
 
 # Keys
-apiKey = "PKT0JEG72DBJCB4EUJYH"
-secretKey = "5ZRWejuNlnmBe0yMQ6ufWJygWmZCq6uErOAPJdKY"
+apiKey = ""
+secretKey = ""
 
 # Imports for Paper Trading
 

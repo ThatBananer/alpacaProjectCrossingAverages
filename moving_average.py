@@ -29,9 +29,9 @@ class MovingAverage:
     # calc new avg
     def __calcNewMA(self, newVal):
         self.linked_list.newHead(newVal)
-        self.movingAvgSum =+ newVal
+        self.movingAvgSum += newVal
         if self.linked_list.length == self.time_period_days:
-            self.movingAvgSum =- self.linked_list.tail.data
+            self.movingAvgSum -= self.linked_list.tail.data
             self.linked_list.delete_tail()
 
         if self.movingAvg == 0:
