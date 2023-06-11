@@ -35,7 +35,6 @@ from alpaca.trading.client import TradingClient
 
 import vectorbt as vbt
 from alpaca.data import StockHistoricalDataClient, StockBarsRequest
-from alpaca.data import StockHistoricalDataClient
 
 
 # Functions Needed For Back Testing
@@ -87,11 +86,15 @@ def get_timeframe():
 
 # get new price val function
 def get_new_closing_daily_price(day_iter, symbol_hist):  # day_iter int, symbol_bars df
-    return symbol_hist.loc[day_iter, 'close']
+    row = symbol_hist.iloc[day_iter]
+    return row.loc['close']
 
 # get new vwap function
 def get_new_vwap(day_iter, symbol_hist):  # day_iter int, symbol_bars df
-    return symbol_hist.loc[day_iter, 'vwap']
+    row = symbol_hist.iloc[day_iter]
+    #print(row)
+    #print(row.loc['vwap'])
+    return row.loc['vwap']
 
 
 def signalVerified_vwap_vs_price(buyOrSell, day_iter, symbol_hist):  # buyOrSell String, day_iter int
@@ -108,7 +111,7 @@ def signalVerified_vwap_vs_price(buyOrSell, day_iter, symbol_hist):  # buyOrSell
 # ---- BACK TESTING INPUTS --- #
 # dates in string format
 simulationStartDate = "2023-01-01"
-simulationEndDate = "2023-05-15"
+simulationEndDate = "2023-06-11"
 # dates in datetime format
 dtStartDate = string_to_datetime(simulationStartDate)
 dtEndDate = string_to_datetime(simulationEndDate)
@@ -140,7 +143,11 @@ for index, row in ge_hist.iterrows():
     print(index)
     newPrice = row['close']
     maL.addNewDataPoint(newPrice)
+    print("maL: ")
+    maL.printMA()
     maS.addNewDataPoint(newPrice)
+    print("maS: ")
+    maS.printMA()
     # check if moving averages were crossed
     if maL.movingAvg < maS.movingAvg and not hasStock:
         # generate buy signal
@@ -150,6 +157,7 @@ for index, row in ge_hist.iterrows():
             sharesOfSymbol += sharesToBuy
             accountHoldings -= sharesToBuy * newPrice
             hasStock = True
+            print("Stock has been bought.")
 
     if maL.movingAvg > maS.movingAvg and hasStock:
         # generate sell signal
@@ -159,6 +167,9 @@ for index, row in ge_hist.iterrows():
             sharesOfSymbol = 0
             accountHoldings = sharesToSell * newPrice
             hasStock = False
+            print("Stock has been sold.")
+
+    day_iter += 1
 
 
 

@@ -23,6 +23,9 @@ class MovingAverage:
     def addNewDataPoint(self, newVal):
         self.__calcNewMA(newVal)
 
+    # print moving average
+    def printMA(self):
+        print(f"Avg: {self.movingAvg}\tAvgSum: {self.movingAvgSum}")
 
     # ---- private methods ---- #
 
