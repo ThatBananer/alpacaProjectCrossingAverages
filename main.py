@@ -19,8 +19,8 @@ from linked_list import LinkedList
 from moving_average import MovingAverage
 
 # Keys
-apiKey = ""
-secretKey = ""
+apiKey = "AK6L9QYGDN0B2S8WDAVA"
+secretKey = "xUA3NIAplpwdZAqon5Lp8KFwWqrg9HBNHRm2omxA"
 
 # Imports for Paper Trading
 
@@ -110,8 +110,8 @@ def signalVerified_vwap_vs_price(buyOrSell, day_iter, symbol_hist):  # buyOrSell
 
 # ---- BACK TESTING INPUTS --- #
 # dates in string format
-simulationStartDate = "2023-01-01"
-simulationEndDate = "2023-06-11"
+simulationStartDate = "2021-01-01"
+simulationEndDate = "2023-01-15"
 # dates in datetime format
 dtStartDate = string_to_datetime(simulationStartDate)
 dtEndDate = string_to_datetime(simulationEndDate)
@@ -131,6 +131,7 @@ maL = MovingAverage(maLPeriod)
 maS = MovingAverage(maSPeriod)
 
 # Account in $USD
+startingBalance = 10000
 accountHoldings = 10000
 sharesOfSymbol = 0
 
@@ -143,11 +144,11 @@ for index, row in ge_hist.iterrows():
     print(index)
     newPrice = row['close']
     maL.addNewDataPoint(newPrice)
-    print("maL: ")
-    maL.printMA()
+    # print("maL: ")
+    # maL.printMA()
     maS.addNewDataPoint(newPrice)
-    print("maS: ")
-    maS.printMA()
+    # print("maS: ")
+    # maS.printMA()
     # check if moving averages were crossed
     if maL.movingAvg < maS.movingAvg and not hasStock:
         # generate buy signal
@@ -171,6 +172,13 @@ for index, row in ge_hist.iterrows():
 
     day_iter += 1
 
-
-
+print(" - - - - -  REPORT - - - - - -")
+print("startingBalance: ")
+print(startingBalance)
+print("---")
+print("accountHoldings: ")
 print(accountHoldings)
+print("---")
+print("Percent Change: ")
+print((accountHoldings/startingBalance)*100)
+
