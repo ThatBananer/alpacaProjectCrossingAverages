@@ -5,8 +5,6 @@ import asyncio
 import requests
 import pandas as pd
 from datetime import date, datetime, timedelta
-# from ta.volatility import BollingerBands
-# from ta.momentum import RSIIndicator
 from alpaca_trade_api.rest import REST  # , TimeFrame, TimeFrameUnit
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 import json
@@ -14,16 +12,14 @@ import backtrader as bt
 import backtrader.feeds as btfeeds
 
 # My imports
-
 from linked_list import LinkedList
 from moving_average import MovingAverage
 
 # Keys
-apiKey = "AK6L9QYGDN0B2S8WDAVA"
-secretKey = "xUA3NIAplpwdZAqon5Lp8KFwWqrg9HBNHRm2omxA"
+apiKey = ""
+secretKey = ""
 
 # Imports for Paper Trading
-
 from alpaca.trading.client import TradingClient
 
 # ---- PAPER TRADING WITH ALGO ---- #
@@ -32,7 +28,6 @@ from alpaca.trading.client import TradingClient
 #trading_client = TradingClient(apiKey, secretKey, paper=True)
 
 # Imports For Back Testing
-
 import vectorbt as vbt
 from alpaca.data import StockHistoricalDataClient, StockBarsRequest
 
@@ -92,8 +87,6 @@ def get_new_closing_daily_price(day_iter, symbol_hist):  # day_iter int, symbol_
 # get new vwap function
 def get_new_vwap(day_iter, symbol_hist):  # day_iter int, symbol_bars df
     row = symbol_hist.iloc[day_iter]
-    #print(row)
-    #print(row.loc['vwap'])
     return row.loc['vwap']
 
 
@@ -144,11 +137,7 @@ for index, row in ge_hist.iterrows():
     print(index)
     newPrice = row['close']
     maL.addNewDataPoint(newPrice)
-    # print("maL: ")
-    # maL.printMA()
     maS.addNewDataPoint(newPrice)
-    # print("maS: ")
-    # maS.printMA()
     # check if moving averages were crossed
     if maL.movingAvg < maS.movingAvg and not hasStock:
         # generate buy signal
