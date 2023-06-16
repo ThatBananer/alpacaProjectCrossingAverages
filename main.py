@@ -16,8 +16,8 @@ from linked_list import LinkedList
 from moving_average import MovingAverage
 
 # Keys
-apiKey = ""
-secretKey = ""
+apiKey = "PKXVQO6YXA3V0DOVCCS4"
+secretKey = "ZckShVgaZyyu091VF3gTn3i3cmrkT51Qau0ET6QX"
 
 # Imports for Paper Trading
 from alpaca.trading.client import TradingClient
@@ -102,8 +102,10 @@ def signalVerified_vwap_vs_price(buyOrSell, day_iter, symbol_hist):  # buyOrSell
 
 
 # ---- BACK TESTING INPUTS --- #
+stock_client = StockHistoricalDataClient(apiKey, secretKey)
+
 # dates in string format
-simulationStartDate = "2021-01-01"
+simulationStartDate = "2015-12-01"
 simulationEndDate = "2023-01-15"
 # dates in datetime format
 dtStartDate = string_to_datetime(simulationStartDate)
@@ -112,62 +114,104 @@ dtEndDate = string_to_datetime(simulationEndDate)
 delta = dtEndDate - dtStartDate
 
 generalElectricCoSymbol = "GE"
-
-stock_client = StockHistoricalDataClient(apiKey, secretKey)
-
-ge_hist = get_symbol_history(generalElectricCoSymbol, simulationStartDate, simulationEndDate)
-
-# Create MA instances
-maLPeriod = 20  # days
-maSPeriod = 5  # days
-maL = MovingAverage(maLPeriod)
-maS = MovingAverage(maSPeriod)
-
-# Account in $USD
 startingBalance = 10000
 accountHoldings = 10000
-sharesOfSymbol = 0
 
-# bool for keeping track of if holding any stock
-hasStock = False
 
-day_iter = 0
+#
+# ge_hist = get_symbol_history(generalElectricCoSymbol, simulationStartDate, simulationEndDate)
+#
+# # Create MA instances
+# maLPeriod = 20  # days
+# maSPeriod = 5  # days
+# maL = MovingAverage(maLPeriod)
+# maS = MovingAverage(maSPeriod)
+#
+# # Account in $USD
+# startingBalance = 10000
+# accountHoldings = 10000
+# sharesOfSymbol = 0
+#
+# # bool for keeping track of if holding any stock
+# hasStock = False
+#
+# day_iter = 0
+#
+# for index, row in ge_hist.iterrows():
+#     print(index)
+#     newPrice = row['close']
+#     maL.addNewDataPoint(newPrice)
+#     maS.addNewDataPoint(newPrice)
+#     # check if moving averages were crossed
+#     if maL.movingAvg < maS.movingAvg and not hasStock:
+#         # generate buy signal
+#         if signalVerified_vwap_vs_price("buy", day_iter, ge_hist):
+#             # buy
+#             sharesToBuy = accountHoldings // newPrice
+#             sharesOfSymbol += sharesToBuy
+#             accountHoldings -= sharesToBuy * newPrice
+#             hasStock = True
+#             print("Stock has been bought.")
+#
+#     if maL.movingAvg > maS.movingAvg and hasStock:
+#         # generate sell signal
+#         if signalVerified_vwap_vs_price("sell", day_iter, ge_hist):
+#             # sell
+#             sharesToSell = sharesOfSymbol
+#             sharesOfSymbol = 0
+#             accountHoldings = sharesToSell * newPrice
+#             hasStock = False
+#             print("Stock has been sold.")
+#
+#     day_iter += 1
 
-for index, row in ge_hist.iterrows():
-    print(index)
-    newPrice = row['close']
-    maL.addNewDataPoint(newPrice)
-    maS.addNewDataPoint(newPrice)
-    # check if moving averages were crossed
-    if maL.movingAvg < maS.movingAvg and not hasStock:
-        # generate buy signal
-        if signalVerified_vwap_vs_price("buy", day_iter, ge_hist):
-            # buy
-            sharesToBuy = accountHoldings // newPrice
-            sharesOfSymbol += sharesToBuy
-            accountHoldings -= sharesToBuy * newPrice
-            hasStock = True
-            print("Stock has been bought.")
 
-    if maL.movingAvg > maS.movingAvg and hasStock:
-        # generate sell signal
-        if signalVerified_vwap_vs_price("sell", day_iter, ge_hist):
-            # sell
-            sharesToSell = sharesOfSymbol
-            sharesOfSymbol = 0
-            accountHoldings = sharesToSell * newPrice
-            hasStock = False
-            print("Stock has been sold.")
+def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate):
+    hasStock = False
+    day_iter = 0
+    startingBalance = accountHoldings
+    maL = MovingAverage(maL)
+    maS = MovingAverage(maS)
+    stockSymbol_ge_hist = get_symbol_history(stockSymbol, startDate, endDate)
+    sharesOfSymbol = 0
 
-    day_iter += 1
+    for index, row in stockSymbol_ge_hist.iterrows():
+        print(index)
+        newPrice = row['close']
+        maL.addNewDataPoint(newPrice)
+        maS.addNewDataPoint(newPrice)
+        # check if moving averages were crossed
+        if maL.movingAvg < maS.movingAvg and not hasStock:
+            # generate buy signal
+            if signalVerified_vwap_vs_price("buy", day_iter, stockSymbol_ge_hist):
+                # buy
+                sharesToBuy = accountHoldings // newPrice
+                sharesOfSymbol += sharesToBuy
+                accountHoldings -= sharesToBuy * newPrice
+                hasStock = True
+                print("Stock has been bought.")
 
-print(" - - - - -  REPORT - - - - - -")
-print("startingBalance: ")
-print(startingBalance)
-print("---")
-print("accountHoldings: ")
-print(accountHoldings)
-print("---")
-print("Percent Change: ")
-print((accountHoldings/startingBalance)*100)
+        if maL.movingAvg > maS.movingAvg and hasStock:
+            # generate sell signal
+            if signalVerified_vwap_vs_price("sell", day_iter, stockSymbol_ge_hist):
+                # sell
+                sharesToSell = sharesOfSymbol
+                sharesOfSymbol = 0
+                accountHoldings = sharesToSell * newPrice
+                hasStock = False
+                print("Stock has been sold.")
 
+        day_iter += 1
+
+    print(" - - - - -  REPORT - - - - - -")
+    print("startingBalance: ")
+    print(startingBalance)
+    print("---")
+    print("accountHoldings: ")
+    print(accountHoldings)
+    print("---")
+    print("Percent Change: ")
+    print((accountHoldings / startingBalance) * 100)
+
+
+movinAvgCross(1000, 5, 20, "GE", "2015-12-01", "2023-01-15" )
