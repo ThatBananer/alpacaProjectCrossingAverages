@@ -16,8 +16,8 @@ from linked_list import LinkedList
 from moving_average import MovingAverage
 
 # Keys
-apiKey = "PKXVQO6YXA3V0DOVCCS4"
-secretKey = "ZckShVgaZyyu091VF3gTn3i3cmrkT51Qau0ET6QX"
+apiKey = ""
+secretKey = ""
 
 # Imports for Paper Trading
 from alpaca.trading.client import TradingClient
