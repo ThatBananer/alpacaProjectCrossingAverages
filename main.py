@@ -16,6 +16,7 @@ from linked_list import LinkedList
 from moving_average import MovingAverage
 
 # Keys
+
 apiKey = ""
 secretKey = ""
 
@@ -101,75 +102,29 @@ def signalVerified_vwap_vs_price(buyOrSell, day_iter, symbol_hist):  # buyOrSell
     return False
 
 
-# ---- BACK TESTING INPUTS --- #
+# ---- BACK TESTING DATA SET UP --- #
 stock_client = StockHistoricalDataClient(apiKey, secretKey)
 
-# dates in string format
-simulationStartDate = "2015-12-01"
-simulationEndDate = "2023-01-15"
-# dates in datetime format
-dtStartDate = string_to_datetime(simulationStartDate)
-dtEndDate = string_to_datetime(simulationEndDate)
-# timeframe
-delta = dtEndDate - dtStartDate
-
-generalElectricCoSymbol = "GE"
-startingBalance = 10000
-accountHoldings = 10000
+# ---- BACK TESTING DATA RECORDING --- #
 
 
-#
-# ge_hist = get_symbol_history(generalElectricCoSymbol, simulationStartDate, simulationEndDate)
-#
-# # Create MA instances
-# maLPeriod = 20  # days
-# maSPeriod = 5  # days
-# maL = MovingAverage(maLPeriod)
-# maS = MovingAverage(maSPeriod)
-#
-# # Account in $USD
-# startingBalance = 10000
-# accountHoldings = 10000
-# sharesOfSymbol = 0
-#
-# # bool for keeping track of if holding any stock
-# hasStock = False
-#
-# day_iter = 0
-#
-# for index, row in ge_hist.iterrows():
-#     print(index)
-#     newPrice = row['close']
-#     maL.addNewDataPoint(newPrice)
-#     maS.addNewDataPoint(newPrice)
-#     # check if moving averages were crossed
-#     if maL.movingAvg < maS.movingAvg and not hasStock:
-#         # generate buy signal
-#         if signalVerified_vwap_vs_price("buy", day_iter, ge_hist):
-#             # buy
-#             sharesToBuy = accountHoldings // newPrice
-#             sharesOfSymbol += sharesToBuy
-#             accountHoldings -= sharesToBuy * newPrice
-#             hasStock = True
-#             print("Stock has been bought.")
-#
-#     if maL.movingAvg > maS.movingAvg and hasStock:
-#         # generate sell signal
-#         if signalVerified_vwap_vs_price("sell", day_iter, ge_hist):
-#             # sell
-#             sharesToSell = sharesOfSymbol
-#             sharesOfSymbol = 0
-#             accountHoldings = sharesToSell * newPrice
-#             hasStock = False
-#             print("Stock has been sold.")
-#
-#     day_iter += 1
 
 
-def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate):
+# ---- BACK TESTING FUNCTION FOR MOVING AVERAGES --- #
+
+def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate, file = "C:\AlpacaBackTestData\AlpacaData.csv"):
+    data = {
+        'Date' : [],
+        'DailySymbolPrice': [],
+        'maSVal': [],
+        'maLVal': []
+    }
+
+
     hasStock = False
     day_iter = 0
     startingBalance = accountHoldings
+    print(startingBalance)
     maL = MovingAverage(maL)
     maS = MovingAverage(maS)
     stockSymbol_ge_hist = get_symbol_history(stockSymbol, startDate, endDate)
@@ -203,6 +158,12 @@ def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate):
 
         day_iter += 1
 
+        data['DailySymbolPrice'].append(newPrice)
+        data['maSVal'].append(maS.movingAvg)
+        data['maLVal'].append(maL.movingAvg)
+        data['Date'].append(index)
+
+
     print(" - - - - -  REPORT - - - - - -")
     print("startingBalance: ")
     print(startingBalance)
@@ -213,5 +174,10 @@ def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate):
     print("Percent Change: ")
     print((accountHoldings / startingBalance) * 100)
 
+    returnDF = pd.DataFrame(data)
+    returnDF.to_csv(file, index=False)
 
-movinAvgCross(1000, 5, 20, "GE", "2015-12-01", "2023-01-15" )
+    return returnDF
+
+
+movinAvgCross(100000, 5, 20, "GE", "2015-12-01", "2023-01-15" )
