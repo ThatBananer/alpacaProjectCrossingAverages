@@ -19,8 +19,8 @@ from moving_average import MovingAverage
 
 # Keys
 
-apiKey = "PKUHC5P89HMWJOWAIY07"
-secretKey = "zIJh8i9vHJ2oBYjvKKIJGaw9Cq4qalfAk983gUGL"
+apiKey = ""
+secretKey = ""
 
 # Imports for Paper Trading
 from alpaca.trading.client import TradingClient
