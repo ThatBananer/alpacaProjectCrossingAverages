@@ -4,6 +4,8 @@ import logging
 import asyncio
 import requests
 import pandas as pd
+import csv
+import matplotlib.pyplot as plt
 from datetime import date, datetime, timedelta
 from alpaca_trade_api.rest import REST  # , TimeFrame, TimeFrameUnit
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
@@ -17,8 +19,8 @@ from moving_average import MovingAverage
 
 # Keys
 
-apiKey = ""
-secretKey = ""
+apiKey = "PKUHC5P89HMWJOWAIY07"
+secretKey = "zIJh8i9vHJ2oBYjvKKIJGaw9Cq4qalfAk983gUGL"
 
 # Imports for Paper Trading
 from alpaca.trading.client import TradingClient
@@ -112,7 +114,7 @@ stock_client = StockHistoricalDataClient(apiKey, secretKey)
 
 # ---- BACK TESTING FUNCTION FOR MOVING AVERAGES --- #
 
-def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate, file = "C:\AlpacaBackTestData\AlpacaData.csv"):
+def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate, file = "AlpacaData.csv"):
     data = {
         'Date' : [],
         'DailySymbolPrice': [],
@@ -131,7 +133,7 @@ def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate, fi
     sharesOfSymbol = 0
 
     for index, row in stockSymbol_ge_hist.iterrows():
-        print(index)
+        #print(index)
         newPrice = row['close']
         maL.addNewDataPoint(newPrice)
         maS.addNewDataPoint(newPrice)
@@ -144,7 +146,7 @@ def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate, fi
                 sharesOfSymbol += sharesToBuy
                 accountHoldings -= sharesToBuy * newPrice
                 hasStock = True
-                print("Stock has been bought.")
+                #print("Stock has been bought.")
 
         if maL.movingAvg > maS.movingAvg and hasStock:
             # generate sell signal
@@ -154,14 +156,14 @@ def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate, fi
                 sharesOfSymbol = 0
                 accountHoldings = sharesToSell * newPrice
                 hasStock = False
-                print("Stock has been sold.")
+                #print("Stock has been sold.")
 
         day_iter += 1
 
         data['DailySymbolPrice'].append(newPrice)
         data['maSVal'].append(maS.movingAvg)
         data['maLVal'].append(maL.movingAvg)
-        data['Date'].append(index)
+        data['Date'].append(index[1])   #timestamp object saved as string
 
 
     print(" - - - - -  REPORT - - - - - -")
@@ -180,4 +182,54 @@ def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate, fi
     return returnDF
 
 
-movinAvgCross(100000, 5, 20, "GE", "2015-12-01", "2023-01-15" )
+movinAvgCross(100000, 5, 20, "SPY", "2021-12-01", "2023-01-15")
+movinAvgCross(100000, 5, 20, "GE", "2021-12-01", "2023-01-15" )
+
+
+
+# --- Plotting data --- #
+def plotStock(symbol, file='AlpacaData.csv'):
+    with open(file) as f:
+        reader = csv.reader(f)
+        header_row = next(reader)
+
+        # Get dates, daily price, maS, and maL
+        dates, prices, maS, maL = [], [], [], []
+        for row in reader:
+            date_str = row[0]
+            date_dt = datetime.strptime(date_str[:19], '%Y-%m-%d %H:%M:%S') #date string -> datetime object
+            
+            # Adding data
+            dates.append(date_dt)
+            prices.append(float(row[1]))
+            maS.append(float(row[2]))
+            maL.append(float(row[3]))
+
+
+    # print(prices[:30])
+    # print(maS[:30])
+    # print(maL[:30])
+    
+
+    # Plot data
+    plt.style.use('seaborn-v0_8-notebook')
+    fig, ax = plt.subplots()
+    ax.plot(dates, prices, c='black', alpha=0.7)
+    ax.plot(dates, maS, c='red', alpha=0.5)
+    ax.plot(dates, maL, c='blue', alpha=0.5)
+
+    # Format plot
+    title = f"Daily Price of {symbol} with Short and Long Moving Averages\n2021-12-01 through 2023-01-15"
+    ax.set_title(title, fontsize=20)
+    ax.set_xlabel('', fontsize=16)
+    fig.autofmt_xdate()
+    ax.set_ylabel("Price ($)", fontsize=16)
+    ax.legend(['daily price', 'short avg', 'long avg'], loc="upper right")
+
+    # Show plot
+    plt.show()
+
+
+
+# Testing plotting function
+plotStock("GE")
