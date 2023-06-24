@@ -17,10 +17,18 @@ import backtrader.feeds as btfeeds
 from linked_list import LinkedList
 from moving_average import MovingAverage
 
+import os
+
+import sys
+import os
+
+from config.config import configApiKey, configSecretKey
+    
+
 # Keys
 
-apiKey = ""
-secretKey = ""
+apiKey = configApiKey
+secretKey = configSecretKey
 
 # Imports for Paper Trading
 from alpaca.trading.client import TradingClient
@@ -114,7 +122,7 @@ stock_client = StockHistoricalDataClient(apiKey, secretKey)
 
 # ---- BACK TESTING FUNCTION FOR MOVING AVERAGES --- #
 
-def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate, file = "AlpacaData.csv"):
+def movinAvgCross(accountHoldings, maS, maL, stockSymbol, startDate, endDate, file = "outputs/AlpacaData.csv"):
     data = {
         'Date' : [],
         'DailySymbolPrice': [],
@@ -188,7 +196,7 @@ movinAvgCross(100000, 5, 20, "GE", "2021-12-01", "2023-01-15" )
 
 
 # --- Plotting data --- #
-def plotStock(symbol, file='AlpacaData.csv'):
+def plotStock(symbol, file='outputs/AlpacaData.csv'):
     with open(file) as f:
         reader = csv.reader(f)
         header_row = next(reader)
